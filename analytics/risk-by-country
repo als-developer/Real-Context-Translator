@@ -1,0 +1,9 @@
+[
+  {
+    "country": "Saudi Arabia",
+    "total_translations": 1234,
+    "critical_incidents": 45,
+    "risk_rate": 3.65,
+    "top_slangs": ["haram", "khamr"]
+  }
+]
