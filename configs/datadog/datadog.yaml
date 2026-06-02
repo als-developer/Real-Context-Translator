@@ -1,0 +1,56 @@
+# Datadog Agent Configuration for RCT-Engine
+api_key: ${DD_API_KEY}
+site: datadoghq.com
+
+tags:
+  - env:production
+  - service:rct-engine
+  - version:3.0.0
+
+logs_enabled: true
+process_config:
+  enabled: true
+  scrub_args: true
+
+apm_config:
+  enabled: true
+  sampling_rate: 0.5
+  ignore_resources:
+    - /health
+    - /metrics
+
+# Custom metrics
+dogstatsd_mapper_profiles:
+  - name: rct_engine
+    prefix: "rct."
+    mappings:
+      - match: "rct.api.request.*"
+        name: "rct.api.request"
+        tags:
+          endpoint: "$1"
+      - match: "rct.translation.*"
+        name: "rct.translation"
+        tags:
+          country: "$1"
+
+# Integrations
+integrations:
+  postgres:
+    init_config:
+    instances:
+      - host: postgres
+        port: 5432
+        username: datadog
+        password: ${DD_POSTGRES_PASSWORD}
+        dbname: rct_saas
+        tags:
+          - role:primary
+
+  redis:
+    init_config:
+    instances:
+      - host: redis
+        port: 6379
+        password: ${DD_REDIS_PASSWORD}
+        tags:
+          - role:cache
