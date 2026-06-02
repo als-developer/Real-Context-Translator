@@ -1,0 +1,58 @@
+{
+  "title": "RCT-Engine Compliance Dashboard",
+  "uid": "compliance-dashboard",
+  "panels": [
+    {
+      "id": 1,
+      "title": "SOC2 Controls Status",
+      "type": "table",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [{
+        "expr": "soc2_control_status",
+        "format": "table",
+        "instant": true
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Audit Log Volume (Last 30 days)",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [{
+        "expr": "sum(increase(audit_log_entries_total[1d]))"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Failed Login Attempts",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 0, "y": 8},
+      "targets": [{
+        "expr": "sum(increase(failed_logins_total[24h]))"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Compliance Score",
+      "type": "gauge",
+      "gridPos": {"h": 4, "w": 6, "x": 6, "y": 8},
+      "targets": [{
+        "expr": "compliance_score_percent"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "min": 0,
+          "max": 100,
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": 0},
+              {"color": "yellow", "value": 70},
+              {"color": "green", "value": 90}
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
