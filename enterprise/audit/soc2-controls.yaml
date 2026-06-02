@@ -1,0 +1,68 @@
+# SOC2 Controls Mapping for RCT-Engine
+
+controls:
+  - id: CC6.1
+    name: "Logical Access Controls"
+    description: "Access to system components is restricted to authorized personnel"
+    implementations:
+      - "FIDO2 WebAuthn MFA for admin access"
+      - "API key authentication with rotation policy"
+      - "Role-based access control (RBAC)"
+    evidence:
+      - "Auth logs in audit database"
+      - "API key rotation records"
+
+  - id: CC6.6
+    name: "Encryption of Sensitive Data"
+    description: "Sensitive data is encrypted at rest and in transit"
+    implementations:
+      - "TLS 1.3 for all endpoints"
+      - "AES-256 encryption for database"
+      - "GPG encryption for backups"
+    evidence:
+      - "TLS certificate configuration"
+      - "Database encryption status"
+
+  - id: CC7.1
+    name: "Monitoring for Security Events"
+    description: "Security events are monitored and reviewed"
+    implementations:
+      - "Prometheus metrics collection"
+      - "Loki log aggregation"
+      - "Alertmanager with Slack/PagerDuty"
+    evidence:
+      - "Alert history"
+      - "Log retention verification"
+
+  - id: CC8.1
+    name: "Change Management"
+    description: "Changes to system components are authorized and tested"
+    implementations:
+      - "GitHub Actions CI/CD pipeline"
+      - "Automated testing suite"
+      - "Canary deployment process"
+    evidence:
+      - "Deployment history"
+      - "Test coverage reports"
+
+  - id: A1.2
+    name: "Service Availability"
+    description: "System maintains agreed availability levels"
+    implementations:
+      - "Multi-AZ deployment"
+      - "Auto-scaling configuration"
+      - "Health check endpoints"
+    evidence:
+      - "Uptime monitoring"
+      - "Incident response logs"
+
+  - id: PI1.1
+    name: "Incident Response"
+    description: "Procedures for responding to security incidents"
+    implementations:
+      - "Runbook documentation"
+      - "On-call rotation"
+      - "Disaster recovery scripts"
+    evidence:
+      - "Incident reports"
+      - "DR test results"
