@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>503 - Maintenance | RCT-Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #F1F5F9;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+        }
+        .code {
+            font-size: 6rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #F59E0B, #EF4444);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #94A3B8;
+            margin-bottom: 1.5rem;
+        }
+        .progress-container {
+            width: 100%;
+            background: #1E293B;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 8px;
+            background: linear-gradient(90deg, #3B82F6, #06B6D4);
+            border-radius: 8px;
+            animation: progress 2s ease-in-out infinite alternate;
+        }
+        @keyframes progress {
+            0% { width: 10%; }
+            100% { width: 90%; }
+        }
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .retry-info {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="code">503</div>
+        <div class="icon">🔧</div>
+        <h1>Under Maintenance</h1>
+        <p>RCT-Engine is currently undergoing scheduled maintenance. We'll be back shortly.</p>
+        <div class="progress-container">
+            <div class="progress-bar"></div>
+        </div>
+        <div class="retry-info">
+            Estimated completion: <span id="eta"></span>
+        </div>
+    </div>
+    <script>
+        // Set ETA to 5 minutes from now
+        const eta = new Date(Date.now() + 5 * 60000);
+        document.getElementById('eta').textContent = eta.toLocaleTimeString();
+        
+        // Auto refresh every 30 seconds
+        setTimeout(() => {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>
