@@ -1,0 +1,87 @@
+policy_module(rct_engine, 1.0.0)
+
+########################################
+# Declarations
+########################################
+
+type rct_engine_t;
+type rct_engine_exec_t;
+init_daemon_domain(rct_engine_t, rct_engine_exec_t)
+
+type rct_engine_log_t;
+logging_log_file(rct_engine_log_t)
+
+type rct_engine_var_t;
+files_type(rct_engine_var_t)
+
+########################################
+# Ports
+########################################
+
+allow rct_engine_t self:tcp_socket create_stream_socket_perms;
+allow rct_engine_t self:udp_socket create_socket_perms;
+
+corenet_tcp_bind_http_port(rct_engine_t)
+corenet_tcp_connect_http_port(rct_engine_t)
+corenet_tcp_bind_generic_node(rct_engine_t)
+
+########################################
+# Network
+########################################
+
+allow rct_engine_t self:capability net_raw;
+allow rct_engine_t self:capability net_admin;
+
+# Allow outbound connections to OpenAI, Stripe, etc.
+corenet_tcp_connect_all_ports(rct_engine_t)
+corenet_udp_bind_all_ports(rct_engine_t)
+
+########################################
+# Database
+########################################
+
+# PostgreSQL connection
+postgresql_stream_connect(rct_engine_t)
+allow rct_engine_t postgresql_port_t:tcp_socket name_connect;
+
+# Redis connection
+allow rct_engine_t redis_port_t:tcp_socket name_connect;
+
+########################################
+# File Access
+########################################
+
+manage_dirs_pattern(rct_engine_t, rct_engine_var_t, rct_engine_var_t)
+manage_files_pattern(rct_engine_t, rct_engine_var_t, rct_engine_var_t)
+files_var_lib_filetrans(rct_engine_t, rct_engine_var_t, dir)
+
+logging_log_filetrans(rct_engine_t, rct_engine_log_t, file)
+allow rct_engine_t rct_engine_log_t:file create_file_perms;
+
+########################################
+# Process
+########################################
+
+allow rct_engine_t self:process { fork sigchld sigkill sigstop signull getsched setsched };
+allow rct_engine_t self:capability { dac_override setuid setgid sys_resource };
+
+# Allow binding to ports
+allow rct_engine_t self:capability net_bind_service;
+
+########################################
+# Optional - AVX-512 Support
+########################################
+
+optional_policy(`
+    allow rct_engine_t self:capability sys_rawio;
+    allow rct_engine_t self:process execmem;
+')
+
+########################################
+# Required for Nginx reverse proxy
+########################################
+
+optional_policy(`
+    nginx_stream_connect(rct_engine_t)
+    allow rct_engine_t nginx_t:unix_stream_socket connectto;
+')
