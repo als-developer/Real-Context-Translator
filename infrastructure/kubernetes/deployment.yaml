@@ -1,0 +1,171 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rct-api
+  namespace: rct-engine
+  labels:
+    app: rct-api
+    version: v3
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: rct-api
+  template:
+    metadata:
+      labels:
+        app: rct-api
+        version: v3
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+      - name: api
+        image: ghcr.io/rct-engine/api:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+          name: http
+        env:
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: rct-config
+              key: environment
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: rct-secrets
+              key: database_url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: rct-secrets
+              key: redis_url
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: rct-secrets
+              key: openai_key
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - rct-api
+              topologyKey: kubernetes.io/hostname
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rct-worker
+  namespace: rct-engine
+  labels:
+    app: rct-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rct-worker
+  template:
+    metadata:
+      labels:
+        app: rct-worker
+    spec:
+      containers:
+      - name: worker
+        image: ghcr.io/rct-engine/worker:latest
+        imagePullPolicy: Always
+        env:
+        - name: ENVIRONMENT
+          valueFrom:
+            configMapKeyRef:
+              name: rct-config
+              key: environment
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: rct-secrets
+              key: database_url
+        - name: REDIS_URL
+          valueFrom:
+            secretKeyRef:
+              name: rct-secrets
+              key: redis_url
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rct-billing-exporter
+  namespace: rct-engine
+  labels:
+    app: rct-billing-exporter
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rct-billing-exporter
+  template:
+    metadata:
+      labels:
+        app: rct-billing-exporter
+    spec:
+      containers:
+      - name: exporter
+        image: ghcr.io/rct-engine/billing-exporter:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9102
+          name: metrics
+        env:
+        - name: REDIS_ADDR
+          valueFrom:
+            secretKeyRef:
+              name: rct-secrets
+              key: redis_addr
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "256Mi"
+            cpu: "200m"
