@@ -1,0 +1,70 @@
+{
+  "title": "RCT-Engine Billing & Revenue",
+  "uid": "rct-billing-metrics",
+  "editable": true,
+  "refresh": "1m",
+  "panels": [
+    {
+      "id": 1,
+      "title": "Daily Revenue (USD)",
+      "type": "graph",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [{
+        "expr": "sum(increase(stripe_invoice_paid_total[1d])) / 100",
+        "legendFormat": "Revenue ($)"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "USD",
+          "decimals": 2
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "MRR (Monthly Recurring Revenue)",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+      "targets": [{
+        "expr": "sum(stripe_subscription_amount_total) / 100",
+        "format": "time_series"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "USD",
+          "decimals": 0
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Active Subscriptions",
+      "type": "stat",
+      "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+      "targets": [{
+        "expr": "sum(stripe_active_subscriptions_total)"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Cost per 1K Words",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [{
+        "expr": "sum(increase(rct_billing_revenue_total[5m])) / sum(increase(rct_billing_words_total[5m])) * 1000",
+        "legendFormat": "Avg CPPW ($)"
+      }],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "USD",
+          "decimals": 4
+        }
+      }
+    }
+  ]
+}
