@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Server Error | RCT-Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #F1F5F9;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+        }
+        .code {
+            font-size: 8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #EF4444, #F59E0B);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #94A3B8;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #3B82F6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background 0.2s;
+            margin: 0 0.5rem;
+        }
+        .btn-secondary {
+            background: #1E293B;
+            border: 1px solid #334155;
+        }
+        .btn-secondary:hover {
+            background: #334155;
+        }
+        .btn:hover {
+            background: #2563EB;
+        }
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .error-id {
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: #64748B;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="code">500</div>
+        <div class="icon">⚠️</div>
+        <h1>Internal Server Error</h1>
+        <p>Something went wrong on our end. Our team has been notified.</p>
+        <div>
+            <a href="javascript:location.reload()" class="btn">Try Again</a>
+            <a href="/" class="btn btn-secondary">Return to Dashboard</a>
+        </div>
+        <div class="error-id">
+            Error ID: <span id="error-id"></span>
+        </div>
+    </div>
+    <script>
+        document.getElementById('error-id').textContent = 
+            'ERR_' + Math.random().toString(36).substring(2, 10).toUpperCase();
+    </script>
+</body>
+</html>
