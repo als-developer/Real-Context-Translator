@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EntityDescriptor entityID="urn:rct-engine:saml" xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
+    <SPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol" AuthnRequestsSigned="true" WantAssertionsSigned="true">
+        <Extensions>
+            <ui:UIInfo xmlns:ui="urn:oasis:names:tc:SAML:metadata:ui">
+                <ui:DisplayName xml:lang="en">RCT-Engine Enterprise SSO</ui:DisplayName>
+                <ui:Description xml:lang="en">Single Sign-On for RCT-Engine Ultimate</ui:Description>
+                <ui:Logo url="https://rct-engine.com/logo.png" height="64" width="64"/>
+            </ui:UIInfo>
+        </Extensions>
+        
+        <KeyDescriptor use="signing">
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                    <ds:X509Certificate>
+                        <!-- Base64 encoded certificate -->
+                        MIIDrzCCApegAwIBAgIU...
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </KeyDescriptor>
+        
+        <KeyDescriptor use="encryption">
+            <ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+                <ds:X509Data>
+                    <ds:X509Certificate>
+                        <!-- Base64 encoded certificate -->
+                        MIIDrzCCApegAwIBAgIU...
+                    </ds:X509Certificate>
+                </ds:X509Data>
+            </ds:KeyInfo>
+        </KeyDescriptor>
+        
+        <SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://api.rct-engine.com/saml/logout"/>
+        
+        <NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</NameIDFormat>
+        
+        <AssertionConsumerService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://api.rct-engine.com/saml/acs" index="1" isDefault="true"/>
+        
+        <AttributeConsumingService index="1">
+            <ServiceName xml:lang="en">RCT-Engine Attributes</ServiceName>
+            <RequestedAttribute Name="email" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
+            <RequestedAttribute Name="firstName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
+            <RequestedAttribute Name="lastName" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
+            <RequestedAttribute Name="organization" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="true"/>
+            <RequestedAttribute Name="role" NameFormat="urn:oasis:names:tc:SAML:2.0:attrname-format:basic" isRequired="false"/>
+        </AttributeConsumingService>
+    </SPSSODescriptor>
+</EntityDescriptor>
