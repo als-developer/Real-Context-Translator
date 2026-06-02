@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rct-api
+  namespace: rct-engine
+  labels:
+    app: rct-api
+spec:
+  selector:
+    app: rct-api
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: http
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rct-billing-exporter
+  namespace: rct-engine
+  labels:
+    app: rct-billing-exporter
+spec:
+  selector:
+    app: rct-billing-exporter
+  ports:
+  - port: 9102
+    targetPort: 9102
+    name: metrics
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rct-redis
+  namespace: rct-engine
+spec:
+  selector:
+    app: redis
+  ports:
+  - port: 6379
+    targetPort: 6379
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rct-postgres
+  namespace: rct-engine
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+  type: ClusterIP
