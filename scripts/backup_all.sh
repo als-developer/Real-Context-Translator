@@ -78,3 +78,21 @@ fi
 
 # 8. Upload to S3 (if configured)
 if [ -n "${AWS_S3_BUCKET:-}" ]; then
+    echo "8. Uploading to S3..."
+    BACKUP_FILE="$BACKUP_PATH.tar.gz"
+    [ -n "$ENCRYPT_KEY" ] && BACKUP_FILE="$BACKUP_PATH.tar.gz.enc"
+    aws s3 cp "$BACKUP_FILE" "s3://$AWS_S3_BUCKET/backups/"
+    echo "   ✓ Uploaded to S3"
+fi
+
+# 9. Cleanup old backups (keep 30 days)
+echo "9. Cleaning up old backups..."
+find "$BACKUP_DIR" -name "backup-*.tar.gz*" -mtime +30 -delete
+echo "   ✓ Cleanup completed"
+
+echo ""
+echo "=========================================="
+echo "✅ Backup completed successfully!"
+echo "   Location: $BACKUP_PATH.tar.gz"
+echo "   Size: $(du -h "$BACKUP_PATH.tar.gz" | cut -f1)"
+echo "=========================================="
