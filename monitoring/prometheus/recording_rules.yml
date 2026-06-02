@@ -1,0 +1,24 @@
+groups:
+  - name: rct_api_recording
+    interval: 30s
+    rules:
+      - record: rct:api:request_rate:5m
+        expr: sum(rate(rct_api_requests_total[5m]))
+
+      - record: rct:api:error_rate:5m
+        expr: sum(rate(rct_api_errors_total[5m])) / sum(rate(rct_api_requests_total[5m]))
+
+      - record: rct:translation:words_per_second:5m
+        expr: sum(rate(rct_billing_words_total[5m]))
+
+      - record: rct:critical_blocks:rate:5m
+        expr: sum(rate(rct_critical_blocks_total[5m]))
+
+      - record: rct:api:p99_latency:5m
+        expr: histogram_quantile(0.99, sum(rate(rct_api_request_duration_ms_bucket[5m])) by (le))
+
+      - record: rct:country:risk_rate:5m
+        expr: sum(rate(rct_critical_blocks_total{country!=""}[5m])) by (country) / sum(rate(rct_translations_total{country!=""}[5m])) by (country)
+
+      - record: rct:org:word_usage:1h
+        expr: sum(increase(rct_billing_words_total[1h])) by (organization)
