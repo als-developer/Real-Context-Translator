@@ -1,0 +1,72 @@
+# Prometheus ServiceMonitors for Kubernetes
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rct-api-monitor
+  namespace: rct-engine
+  labels:
+    app: rct-engine
+spec:
+  selector:
+    matchLabels:
+      app: rct-api
+  endpoints:
+  - port: http
+    path: /metrics
+    interval: 30s
+    scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+    - rct-engine
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: rct-billing-monitor
+  namespace: rct-engine
+spec:
+  selector:
+    matchLabels:
+      app: rct-billing-exporter
+  endpoints:
+  - port: metrics
+    path: /metrics
+    interval: 30s
+  namespaceSelector:
+    matchNames:
+    - rct-engine
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: rct-postgres-monitor
+  namespace: rct-engine
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  podMetricsEndpoints:
+  - port: metrics
+    interval: 30s
+  namespaceSelector:
+    matchNames:
+    - rct-engine
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: rct-alerts
+  namespace: rct-engine
+spec:
+  groups:
+  - name: rct.rules
+    rules:
+    - alert: HighErrorRate
+      expr: sum(rate(rct_api_errors_total[5m])) / sum(rate(rct_api_requests_total[5m])) > 0.05
+      for: 2m
+      labels:
+        severity: critical
+      annotations:
+        summary: "High error rate detected"
+        description: "Error rate is {{ $value | humanizePercentage }}"
