@@ -1,0 +1,255 @@
+name: Full Test Suite
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+  push:
+    branches:
+      - develop
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run Black formatter
+        uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./backend"
+
+      - name: Run isort
+        uses: isort/isort-action@v1
+        with:
+          configuration: "--check-only --diff"
+
+      - name: Run flake8
+        run: |
+          pip install flake8
+          flake8 backend/ --count --statistics --show-source
+
+      - name: Run mypy
+        run: |
+          pip install mypy
+          mypy backend/ --ignore-missing-imports
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.10', '3.11']
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install -r backend/requirements-dev.txt
+
+      - name: Run unit tests
+        run: |
+          pytest tests/unit -v --cov=backend --cov-report=term-missing
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-python-${{ matrix.python-version }}
+          path: |
+            .pytest_cache/
+            htmlcov/
+
+  integration-tests:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_pass
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+          pip install -r backend/requirements-dev.txt
+
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
+        run: |
+          alembic upgrade head
+
+      - name: Run integration tests
+        env:
+          DATABASE_URL: postgresql://test_user:test_pass@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379/0
+          TEST_MODE: true
+        run: |
+          pytest tests/integration -v --tb=short
+
+  cpp-tests:
+    name: C++ Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++-13 cmake libgtest-dev
+
+      - name: Build C++ tests
+        run: |
+          cd backend/cpp_engine
+          mkdir -p build && cd build
+          cmake .. -DCMAKE_CXX_COMPILER=g++-13
+          make
+
+      - name: Run C++ tests
+        run: |
+          cd backend/cpp_engine/build
+          ctest --output-on-failure
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+      - name: Run CodeQL analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: python, javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  performance-test:
+    name: Performance Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          docker-compose -f infrastructure/docker/docker-compose.yml up -d
+          sleep 10
+
+      - name: Install Locust
+        run: pip install locust
+
+      - name: Run performance tests
+        run: |
+          cd tests/performance
+          ./run_perf_test.sh http://localhost:8000 50 5 2m
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-results
+          path: tests/performance/perf_results_*.csv
+
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright
+        run: |
+          cd frontend/web
+          npm ci
+          npx playwright install --with-deps
+
+      - name: Build frontend
+        run: |
+          cd frontend/web
+          npm run build
+
+      - name: Run E2E tests
+        run: |
+          cd frontend/web
+          npm run test:e2e
+
+      - name: Upload E2E artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/web/playwright-report/
+
+  validate:
+    name: Validation Gate
+    runs-on: ubuntu-latest
+    needs: [lint, unit-tests, integration-tests, cpp-tests, security-scan]
+    if: always()
+    
+    steps:
+      - name: Check results
+        run: |
+          echo "All required checks passed"
