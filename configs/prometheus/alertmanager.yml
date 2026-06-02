@@ -27,4 +27,63 @@ route:
       receiver: 'slack-warnings'
     
     - match:
-        alertname
+        alertname: 'Watchdog'
+      receiver: 'null'
+
+receivers:
+  - name: 'default-receiver'
+    slack_configs:
+      - channel: '#rct-alerts'
+        title: '[RCT-Engine] {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Alert:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Severity:* {{ .Labels.severity }}
+          *Instance:* {{ .Labels.instance }}
+          *Time:* {{ .StartsAt | date "15:04:05" }}
+          {{ end }}
+
+  - name: 'slack-engineering-critical'
+    slack_configs:
+      - channel: '#rct-engineering'
+        color: '#FF0000'
+        title: '🚨 CRITICAL: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Summary:* {{ .Annotations.summary }}
+          *Description:* {{ .Annotations.description }}
+          *Impact:* {{ .Annotations.impact }}
+          *Action:* {{ .Annotations.action }}
+          {{ end }}
+        actions:
+          - type: button
+            text: "View in Grafana"
+            url: "https://monitoring.rct-engine.com"
+
+  - name: 'slack-compliance-critical'
+    slack_configs:
+      - channel: '#rct-compliance'
+        color: '#FF0000'
+        title: '⚠️ COMPLIANCE BREACH: {{ .GroupLabels.alertname }}'
+        text: |
+          {{ range .Alerts }}
+          *Country:* {{ .Labels.country }}
+          *Risk Type:* {{ .Labels.risk_type }}
+          *Detected Slang:* {{ .Annotations.slang }}
+          *Action Required:* {{ .Annotations.action }}
+          {{ end }}
+
+  - name: 'slack-warnings'
+    slack_configs:
+      - channel: '#rct-warnings'
+        color: '#FFA500'
+        title: '⚠️ Warning: {{ .GroupLabels.alertname }}'
+        text: '{{ .Annotations.description }}'
+
+  - name: 'pagerduty'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_INTEGRATION_KEY}'
+        severity: 'critical'
+  
+  - name: 'null'
