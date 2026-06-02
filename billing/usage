@@ -1,0 +1,8 @@
+{
+  "total_words": 123456,
+  "total_cost_cents": 6172,
+  "daily_breakdown": [
+    {"date": "2026-05-30", "words": 4567},
+    {"date": "2026-05-29", "words": 3890}
+  ]
+}
