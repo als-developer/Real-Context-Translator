@@ -1,0 +1,122 @@
+name: Post-Deployment Hooks
+
+on:
+  deployment_status:
+    states: [success]
+
+jobs:
+  notify-deployment:
+    name: Notify Deployment Status
+    runs-on: ubuntu-latest
+    if: github.event.deployment_status.state == 'success'
+    
+    steps:
+      - name: Send Slack notification
+        uses: slackapi/slack-github-action@v1.25
+        with:
+          payload: |
+            {
+              "text": "✅ RCT-Engine Deployment Successful",
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "✅ Deployment Successful"
+                  }
+                },
+                {
+                  "type": "section",
+                  "fields": [
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Environment:*\n${{ github.event.deployment.environment }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Version:*\n${{ github.sha }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Deployed By:*\n${{ github.actor }}"
+                    },
+                    {
+                      "type": "mrkdwn",
+                      "text": "*Time:*\n$(date)"
+                    }
+                  ]
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Dashboard"
+                      },
+                      "url": "https://dashboard.rct-engine.com"
+                    },
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Grafana"
+                      },
+                      "url": "https://monitoring.rct-engine.com"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  run-smoke-tests:
+    name: Run Smoke Tests
+    runs-on: ubuntu-latest
+    needs: notify-deployment
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Wait for deployment
+        run: sleep 30
+      
+      - name: Run smoke tests
+        run: |
+          ./scripts/smoke_test.sh https://api.${{ github.event.deployment.environment }}.rct-engine.com
+      
+      - name: Post test results
+        if: always()
+        run: |
+          echo "Smoke tests completed with status: ${{ job.status }}"
+
+  update-status-page:
+    name: Update Status Page
+    runs-on: ubuntu-latest
+    needs: run-smoke-tests
+    
+    steps:
+      - name: Update status.cache
+        run: |
+          echo "{\"status\":\"operational\",\"last_deployment\":\"${{ github.sha }}\",\"timestamp\":\"$(date -Iseconds)\"}" > status.json
+      
+      - name: Upload to status bucket
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+      
+      - run: |
+          aws s3 cp status.json s3://rct-engine-status/current.json --cache-control "no-cache"
+
+  trigger-dashboard-refresh:
+    name: Trigger Grafana Dashboard Refresh
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Refresh Grafana datasources
+        run: |
+          curl -X POST "https://monitoring.rct-engine.com/api/datasources/refresh" \
+            -H "Authorization: Bearer ${{ secrets.GRAFANA_API_KEY }}"
