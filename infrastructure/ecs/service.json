@@ -1,0 +1,29 @@
+{
+  "serviceName": "rct-api-service",
+  "cluster": "rct-engine-cluster",
+  "launchType": "FARGATE",
+  "taskDefinition": "rct-api",
+  "desiredCount": 3,
+  "deploymentConfiguration": {
+    "maximumPercent": 200,
+    "minimumHealthyPercent": 100
+  },
+  "networkConfiguration": {
+    "awsvpcConfiguration": {
+      "subnets": ["subnet-abc123", "subnet-def456", "subnet-ghi789"],
+      "securityGroups": ["sg-rct-api-123"],
+      "assignPublicIp": "DISABLED"
+    }
+  },
+  "loadBalancers": [
+    {
+      "targetGroupArn": "arn:aws:elasticloadbalancing:eu-west-1:123456789012:targetgroup/rct-api-tg/123456789",
+      "containerName": "rct-api",
+      "containerPort": 8000
+    }
+  ],
+  "healthCheckGracePeriodSeconds": 60,
+  "schedulingStrategy": "REPLICA",
+  "enableECSManagedTags": true,
+  "propagateTags": "SERVICE"
+}
