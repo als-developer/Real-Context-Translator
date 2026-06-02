@@ -1,0 +1,37 @@
+modules:
+  http_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      valid_http_versions: ["HTTP/1.1", "HTTP/2"]
+      valid_status_codes: []
+      method: GET
+      headers:
+        User-Agent: "PrometheusBlackboxProber"
+      fail_if_ssl: false
+      fail_if_not_ssl: true
+      fail_if_body_matches_regexp:
+        - "Error"
+        - "Exception"
+      tls_config:
+        insecure_skip_verify: false
+
+  http_post_2xx:
+    prober: http
+    timeout: 5s
+    http:
+      method: POST
+      headers:
+        Content-Type: "application/json"
+        X-API-Key: "health_check_key"
+      body: '{"source_text":"health check","source_language":"en","target_country":"KE","target_language":"sw"}'
+      fail_if_body_matches_regexp:
+        - "error"
+        - "critical"
+
+  grpc_health:
+    prober: grpc
+    timeout: 5s
+    grpc:
+      target: "api:8000"
+      service: "health.Health"
