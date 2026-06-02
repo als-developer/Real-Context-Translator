@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCT-Engine Monitoring Dashboards</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #0F172A;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #F1F5F9;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #60A5FA, #22D3EE);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #94A3B8;
+            font-size: 14px;
+        }
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .dashboard-card {
+            background: #1E293B;
+            border-radius: 16px;
+            border: 1px solid #334155;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-4px);
+            border-color: #3B82F6;
+        }
+        .dashboard-preview {
+            height: 180px;
+            background: #0F172A;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .dashboard-preview svg {
+            width: 60px;
+            height: 60px;
+            opacity: 0.6;
+        }
+        .dashboard-info {
+            padding: 20px;
+        }
+        .dashboard-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        .dashboard-description {
+            font-size: 13px;
+            color: #94A3B8;
+            line-height: 1.5;
+        }
+        .badge {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 4px 10px;
+            background: #0F172A;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #60A5FA;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 48px;
+            padding-top: 24px;
+            border-top: 1px solid #334155;
+            color: #64748B;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 RCT-Engine Monitoring</h1>
+        <p class="subtitle">Real-time observability dashboards</p>
+    </div>
+
+    <div class="dashboard-grid">
+        <a href="/d/saas-overview" class="dashboard-card">
+            <div class="dashboard-preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="1.5">
+                    <path d="M3 3v18h18"/>
+                    <path d="M18 17V9"/>
+                    <path d="M12 17V5"/>
+                    <path d="M6 17v-3"/>
+                </svg>
+            </div>
+            <div class="dashboard-info">
+                <div class="dashboard-title">SaaS Overview</div>
+                <div class="dashboard-description">API performance, translation volume, error rates, and SLO tracking</div>
+                <span class="badge">Production Critical</span>
+            </div>
+        </a>
+
+        <a href="/d/billing-metrics" class="dashboard-card">
+            <div class="dashboard-preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4 2"/>
+                </svg>
+            </div>
+            <div class="dashboard-info">
+                <div class="dashboard-title">Billing & Revenue</div>
+                <div class="dashboard-description">MRR, usage metering, Stripe integration health, cost analytics</div>
+                <span class="badge">Finance</span>
+            </div>
+        </a>
+
+        <a href="/d/translation-latency" class="dashboard-card">
+            <div class="dashboard-preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="1.5">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                </svg>
+            </div>
+            <div class="dashboard-info">
+                <div class="dashboard-title">Latency Analysis</div>
+                <div class="dashboard-description">P50, P90, P99 latency trends by endpoint and region</div>
+                <span class="badge">Performance</span>
+            </div>
+        </a>
+
+        <a href="/d/infrastructure-health" class="dashboard-card">
+            <div class="dashboard-preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="1.5">
+                    <rect x="2" y="3" width="20" height="14" rx="2"/>
+                    <line x1="8" y1="21" x2="16" y2="21"/>
+                    <line x1="12" y1="17" x2="12" y2="21"/>
+                </svg>
+            </div>
+            <div class="dashboard-info">
+                <div class="dashboard-title">Infrastructure Health</div>
+                <div class="dashboard-description">CPU, memory, disk, network, and container health metrics</div>
+                <span class="badge">Ops</span>
+            </div>
+        </a>
+
+        <a href="/d/cultural-risk" class="dashboard-card">
+            <div class="dashboard-preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="1.5">
+                    <path d="M12 8v4M12 16h.01"/>
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+            </div>
+            <div class="dashboard-info">
+                <div class="dashboard-title">Cultural Risk Heatmap</div>
+                <div class="dashboard-description">Risk detection by country, top slangs, compliance metrics</div>
+                <span class="badge">Compliance</span>
+            </div>
+        </a>
+
+        <a href="/d/security-audit" class="dashboard-card">
+            <div class="dashboard-preview">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#06B6D4" stroke-width="1.5">
+                    <path d="M12 2L3 7v6c0 5 9 9 9 9s9-4 9-9V7l-9-5z"/>
+                    <path d="M12 8v4M12 16h.01"/>
+                </svg>
+            </div>
+            <div class="dashboard-info">
+                <div class="dashboard-title">Security Audit</div>
+                <div class="dashboard-description">Auth attempts, API key usage, FIDO2 MFA logs, threats</div>
+                <span class="badge">Security</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="footer">
+        <p>RCT-Engine Ultimate | Grafana Dashboards | <span id="timestamp"></span></p>
+    </div>
+
+    <script>
+        document.getElementById('timestamp').textContent = new Date().toLocaleString();
+    </script>
+</body>
+</html>
