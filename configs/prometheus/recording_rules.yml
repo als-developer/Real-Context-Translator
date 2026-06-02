@@ -1,0 +1,49 @@
+groups:
+  - name: rct_slo_recording
+    interval: 30s
+    rules:
+      # API availability SLO
+      - record: slo:api_availability:ratio_rate5m
+        expr: |
+          sum(rate(rct_api_up[5m])) 
+          / 
+          sum(rate(rct_api_requests_total[5m]))
+      
+      # API latency SLO (P99 < 200ms)
+      - record: slo:api_latency:ratio_rate5m
+        expr: |
+          sum(rate(rct_api_request_duration_ms_bucket{le="200"}[5m]))
+          /
+          sum(rate(rct_api_request_duration_ms_bucket[5m]))
+      
+      # Error rate SLO (< 0.1%)
+      - record: slo:api_error_rate:ratio_rate5m
+        expr: |
+          sum(rate(rct_api_errors_total[5m]))
+          /
+          sum(rate(rct_api_requests_total[5m]))
+      
+      # Cultural risk detection rate
+      - record: rct:cultural_block_rate:ratio_rate5m
+        expr: |
+          sum(rate(rct_critical_blocks_total[5m]))
+          /
+          sum(rate(rct_translations_total[5m]))
+
+  - group_name: rct_business_metrics
+    interval: 1m
+    rules:
+      # Words processed per day
+      - record: rct:daily_words_processed
+        expr: |
+          sum(increase(rct_billing_words_total[1d]))
+      
+      # Revenue per day (estimated)
+      - record: rct:daily_revenue_usd
+        expr: |
+          sum(increase(rct_billing_words_total[1d])) * 0.0005
+      
+      # Active customers
+      - record: rct:active_customers
+        expr: |
+          sum(rct_active_subscriptions)
