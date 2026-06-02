@@ -1,0 +1,79 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: RCT-Engine RDS CloudWatch Alarms
+
+Parameters:
+  DBInstanceId:
+    Type: String
+    Description: RDS instance identifier
+  AlarmEmail:
+    Type: String
+    Description: Email address for alarms
+    Default: alarms@rct-engine.com
+
+Resources:
+  HighCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${DBInstanceId}-HighCPU"
+      AlarmDescription: CPU utilization exceeds 75% for 10 minutes
+      MetricName: CPUUtilization
+      Namespace: AWS/RDS
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 75
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref SNSAlarmTopic
+      Dimensions:
+        - Name: DBInstanceIdentifier
+          Value: !Ref DBInstanceId
+
+  HighConnectionsAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${DBInstanceId}-HighConnections"
+      AlarmDescription: Database connections exceed 400
+      MetricName: DatabaseConnections
+      Namespace: AWS/RDS
+      Statistic: Average
+      Period: 60
+      EvaluationPeriods: 3
+      Threshold: 400
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref SNSAlarmTopic
+      Dimensions:
+        - Name: DBInstanceIdentifier
+          Value: !Ref DBInstanceId
+
+  LowStorageAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${DBInstanceId}-LowStorage"
+      AlarmDescription: Free storage space below 5GB
+      MetricName: FreeStorageSpace
+      Namespace: AWS/RDS
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 1
+      Threshold: 5000000000
+      ComparisonOperator: LessThanThreshold
+      AlarmActions:
+        - !Ref SNSAlarmTopic
+      Dimensions:
+        - Name: DBInstanceIdentifier
+          Value: !Ref DBInstanceId
+
+  SNSAlarmTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: RCT-Engine RDS Alarms
+      Subscription:
+        - Endpoint: !Ref AlarmEmail
+          Protocol: email
+
+Outputs:
+  SNSTopicArn:
+    Description: SNS Topic ARN for alarms
+    Value: !Ref SNSAlarmTopic
