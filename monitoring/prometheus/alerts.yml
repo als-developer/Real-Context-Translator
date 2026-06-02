@@ -1,0 +1,100 @@
+groups:
+  - name: rct_api_alerts
+    interval: 30s
+    rules:
+      - alert: HighAPILatency
+        expr: histogram_quantile(0.99, sum(rate(rct_api_request_duration_ms_bucket[5m])) by (le, endpoint)) > 2000
+        for: 5m
+        labels:
+          severity: critical
+          team: engineering
+        annotations:
+          summary: "High API latency detected"
+          description: "P99 latency for {{ $labels.endpoint }} is {{ $value }}ms"
+
+      - alert: HighErrorRate
+        expr: sum(rate(rct_api_errors_total[5m])) / sum(rate(rct_api_requests_total[5m])) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate"
+          description: "Error rate is {{ $value | humanizePercentage }}"
+
+      - alert: CulturalBlockSpike
+        expr: sum(rate(rct_critical_blocks_total[5m])) > 10
+        for: 1m
+        labels:
+          severity: warning
+          team: compliance
+        annotations:
+          summary: "Cultural block spike detected"
+          description: "{{ $value }} critical blocks per second"
+
+      - alert: APIDown
+        expr: up{job="rct-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "API is down"
+          description: "RCT API has been down for more than 1 minute"
+
+      - alert: DatabaseConnectionPoolExhausted
+        expr: pg_stat_database_numbackends > 450
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database connections high"
+          description: "Database has {{ $value }} active connections"
+
+      - alert: RedisMemoryPressure
+        expr: redis_memory_used_bytes / redis_memory_max_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Redis memory pressure"
+          description: "Redis is using {{ $value | humanizePercentage }} of max memory"
+
+  - name: rct_billing_alerts
+    rules:
+      - alert: StripeWebhookFailure
+        expr: increase(stripe_webhook_failures_total[5m]) > 0
+        for: 1m
+        labels:
+          severity: critical
+          team: finance
+        annotations:
+          summary: "Stripe webhook failures"
+          description: "{{ $value }} webhook failures in last 5 minutes"
+
+      - alert: MeteredUsageNotReporting
+        expr: absent(rct_billing_words_total)
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Metered usage not reporting"
+          description: "No billing metrics received in last 10 minutes"
+
+  - name: rct_worker_alerts
+    rules:
+      - alert: CeleryTaskQueueBacklog
+        expr: celery_queue_length > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Task queue backlog"
+          description: "{{ $value }} tasks pending in queue"
+
+      - alert: WorkerStopped
+        expr: celery_workers_total < 2
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Worker count low"
+          description: "Only {{ $value }} workers running"
