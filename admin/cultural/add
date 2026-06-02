@@ -1,0 +1,8 @@
+{
+  "country_code": "KE",
+  "language_code": "sw",
+  "slang_term": "string",
+  "literal_meaning": "string",
+  "true_cultural_context": "string",
+  "business_risk_level": "LOW | MEDIUM | CRITICAL"
+}
