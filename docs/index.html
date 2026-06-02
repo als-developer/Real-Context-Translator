@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RCT-Engine Ultimate Documentation</title>
+    <style>
+        :root {
+            --bg-primary: #0F172A;
+            --bg-secondary: #1E293B;
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --accent-blue: #3B82F6;
+            --accent-cyan: #06B6D4;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .logo-text h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo-text p {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .nav {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color 0.2s;
+        }
+
+        .nav a:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 3rem 1rem 4rem;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .hero-buttons {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2563EB;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent-blue);
+            background: rgba(59,130,246,0.1);
+        }
+
+        /* Cards Grid */
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 3rem 0 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--accent-blue);
+            display: inline-block;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-blue);
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(59,130,246,0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--accent-blue);
+        }
+
+        .card h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .card p {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .card-link {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .card-link:hover {
+            text-decoration: underline;
+        }
+
+        /* API Endpoints */
+        .api-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .api-header {
+            padding: 1rem 1.5rem;
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .api-header h3 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .api-content {
+            padding: 1.5rem;
+        }
+
+        .endpoint {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.875rem;
+        }
+
+        .method {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            margin-right: 0.75rem;
+        }
+
+        .method.get { background: #10B981; color: white; }
+        .method.post { background: #3B82F6; color: white; }
+        .method.put { background: #F59E0B; color: white; }
+        .method.delete { background: #EF4444; color: white; }
+
+        .path {
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer p {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .hero p { font-size: 1rem; }
+            .main { padding: 1rem; }
+            .header-content { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <h1>RCT-Engine</h1>
+                    <p>Real Context Translator</p>
+                </div>
+            </div>
+            <div class="nav">
+                <a href="#overview">Overview</a>
+                <a href="#api">API Reference</a>
+                <a href="#deployment">Deployment</a>
+                <a href="#monitoring">Monitoring</a>
+                <a href="https://github.com/rct-engine/rct-ultimate">GitHub</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <!-- Hero Section -->
+        <div class="hero">
+            <h1>RCT-Engine Ultimate</h1>
+            <p>Enterprise-grade cultural translation platform with AI-powered context awareness and hardware acceleration</p>
+            <div class="hero-buttons">
+                <a href="#getting-started" class="btn btn-primary">Get Started</a>
+                <a href="API_REFERENCE.md" class="btn btn-secondary">API Reference</a>
+                <a href="https://api.rct-engine.com/docs" class="btn btn-secondary">Live Demo</a>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <h2 class="section-title" id="overview">✨ Key Features</h2>
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                    </svg>
+                </div>
+                <h3>Cultural Context AI</h3>
+                <p>Detects slang, taboos, and regional nuances in real-time with 99.9% accuracy</p>
+                <a href="docs/cultural-ai.md" class="card-link">Learn more →</a>
+            </div>
+            <div class="card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <rect x="2" y="2" width="20" height="20" rx="2.18"/>
+                        <path d="M7 2v20M17 2v20M2 12h20M2 7h5M2 17h5M17 17h5M17 7h5"/>
+                    </svg>
+                </div>
+                <h3>AVX-512 Acceleration</h3>
+                <p>Sub-nanosecond risk detection using hardware vectorization (16x faster)</p>
+                <a href="docs/avx512.md" class="card-link">Learn more →</a>
+            </div>
+            <div class="card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                    </svg>
+                </div>
+                <h3>Multi-Tenant SaaS</h3>
+                <p>Complete billing, usage metering, and subscription management with Stripe</p>
+                <a href="docs/billing.md" class="card-link">Learn more →</a>
+            </div>
+            <div class="card">
+                <div class="card-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M12 2L3 7v6c0 5 9 9 9 9s9-4 9-9V7l-9-5z"/>
+                        <path d="M12 8v4M12 16h.01"/>
+                    </svg>
+                </div>
+                <h3>Enterprise Security</h3>
+                <p>FIDO2 MFA, GPG encryption, SELinux, and zero-trust architecture</p>
+                <a href="docs/security.md" class="card-link">Learn more →</a>
+            </div>
+        </div>
+
+        <!-- API Endpoints -->
+        <h2 class="section-title" id="api">🔌 API Endpoints</h2>
+        <div class="api-section">
+            <div class="api-header">
+                <h3>📡 Translation API</h3>
+            </div>
+            <div class="api-content">
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <span class="path">/api/v1/translate</span>
+                    <span style="color: #64748B; margin-left: 1rem;">Translate text with cultural context</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method post">POST</span>
+                    <span class="path">/api/v1/batch/translate</span>
+                    <span style="color: #64748B; margin-left: 1rem;">Batch translation (up to 100 texts)</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="path">/api/v1/analytics/dashboard</span>
+                    <span style="color: #64748B; margin-left: 1rem;">Get dashboard metrics</span>
+                </div>
+                <div class="endpoint">
+                    <span class="method get">GET</span>
+                    <span class="path">/api/v1/billing/plan</span>
+                    <span style="color: #64748B; margin-left: 1rem;">Get current subscription plan</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Start -->
+        <h2 class="section-title" id="getting-started">🚀 Quick Start</h2>
+        <div class="api-section">
+            <div class="api-header">
+                <h3>📦 Installation</h3>
+            </div>
+            <div class="api-content">
+                <pre style="background: #0F172A; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 0.8rem;">
+git clone https://github.com/rct-engine/rct-ultimate.git
+cd rct-ultimate
+cp .env.example .env
+make build
+make run
+make health</pre>
+            </div>
+        </div>
+
+        <!-- Documentation Links -->
+        <h2 class="section-title">📚 Documentation</h2>
+        <div class="cards-grid">
+            <div class="card">
+                <h3>📖 API Reference</h3>
+                <p>Complete API documentation with examples</p>
+                <a href="API_REFERENCE.md" class="card-link">Read →</a>
+            </div>
+            <div class="card">
+                <h3>🚀 Deployment Guide</h3>
+                <p>AWS, Kubernetes, Docker deployment instructions</p>
+                <a href="DEPLOYMENT_GUIDE.md" class="card-link">Read →</a>
+            </div>
+            <div class="card">
+                <h3>📋 Operations Runbook</h3>
+                <p>Incident response, backup, recovery procedures</p>
+                <a href="RUNBOOK.md" class="card-link">Read →</a>
+            </div>
+            <div class="card">
+                <h3>🏗️ Architecture</h3>
+                <p>System design, data flow, component details</p>
+                <a href="ARCHITECTURE.md" class="card-link">Read →</a>
+            </div>
+            <div class="card">
+                <h3>👨‍💻 Developer Guide</h3>
+                <p>Local development, testing, contribution guide</p>
+                <a href="DEVELOPER_GUIDE.md" class="card-link">Read →</a>
+            </div>
+            <div class="card">
+                <h3>🔧 Troubleshooting</h3>
+                <p>Common issues and solutions</p>
+                <a href="TROUBLESHOOTING.md" class="card-link">Read →</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>RCT-Engine Ultimate v3.0.0 | © 2026 RCT-Engine Inc. | <a href="https://status.rct-engine.com" style="color: #3B82F6;">Status</a> | <a href="https://github.com/rct-engine/rct-ultimate" style="color: #3B82F6;">GitHub</a></p>
+    </div>
+</body>
+</html>
