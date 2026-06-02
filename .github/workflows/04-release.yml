@@ -1,0 +1,91 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-release:
+    name: Build Release Artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set version
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build release archive
+        run: |
+          tar -czf rct-engine-${{ steps.version.outputs.version }}.tar.gz \
+            --exclude='.git' \
+            --exclude='__pycache__' \
+            --exclude='*.pyc' \
+            --exclude='node_modules' \
+            --exclude='.venv' \
+            .
+
+      - name: Generate checksums
+        run: |
+          sha256sum rct-engine-${{ steps.version.outputs.version }}.tar.gz > checksums.txt
+          md5sum rct-engine-${{ steps.version.outputs.version }}.tar.gz >> checksums.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Release ${{ steps.version.outputs.version }}
+          body: |
+            ## RCT-Engine Ultimate Release ${{ steps.version.outputs.version }}
+            
+            ### Features
+            - Add cultural context for 10 new countries
+            - Improve AVX-512 performance by 25%
+            - Add batch translation API
+            
+            ### Bug Fixes
+            - Fix rate limiting for high-volume customers
+            - Resolve Redis connection pool exhaustion
+            - Fix Stripe webhook signature validation
+            
+            ### Security
+            - Update dependencies to latest versions
+            - Add SELinux policy for all services
+            
+            ### Documentation
+            - Update API reference
+            - Add deployment guide for AWS
+          files: |
+            rct-engine-${{ steps.version.outputs.version }}.tar.gz
+            checksums.txt
+          draft: false
+          prerelease: ${{ contains(github.ref, '-rc') }}
+
+      - name: Build and push release images
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: infrastructure/docker/Dockerfile.api
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
+            ghcr.io/${{ github.repository }}:latest
+
+      - name: Upload to S3 release bucket
+        run: |
+          aws s3 cp rct-engine-${{ steps.version.outputs.version }}.tar.gz \
+            s3://rct-engine-releases/${{ steps.version.outputs.version }}/
+          aws s3 cp checksums.txt \
+            s3://rct-engine-releases/${{ steps.version.outputs.version }}/
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
