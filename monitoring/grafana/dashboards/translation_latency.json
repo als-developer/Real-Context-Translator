@@ -1,0 +1,51 @@
+{
+  "title": "Translation Latency Analysis",
+  "uid": "rct-latency",
+  "panels": [
+    {
+      "id": 1,
+      "title": "P50, P90, P99 Latency Trends",
+      "type": "timeseries",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, sum(rate(rct_api_request_duration_ms_bucket[5m])) by (le))",
+          "legendFormat": "P50"
+        },
+        {
+          "expr": "histogram_quantile(0.90, sum(rate(rct_api_request_duration_ms_bucket[5m])) by (le))",
+          "legendFormat": "P90"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(rct_api_request_duration_ms_bucket[5m])) by (le))",
+          "legendFormat": "P99"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Latency Heatmap by Endpoint",
+      "type": "heatmap",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+      "targets": [{
+        "expr": "sum(rate(rct_api_request_duration_ms_bucket[5m])) by (le, endpoint)",
+        "format": "heatmap"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Slowest Requests (Top 10)",
+      "type": "table",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+      "targets": [{
+        "expr": "topk(10, rct_api_request_duration_ms_max)",
+        "format": "table"
+      }]
+    }
+  ]
+}
