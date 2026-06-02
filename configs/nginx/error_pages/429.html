@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>429 - Too Many Requests | RCT-Engine</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #F1F5F9;
+        }
+        .container {
+            text-align: center;
+            padding: 2rem;
+            max-width: 600px;
+        }
+        .code {
+            font-size: 7rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #F59E0B, #EF4444);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        p {
+            color: #94A3B8;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #3B82F6;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #2563EB;
+        }
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        .retry-after {
+            margin-top: 1.5rem;
+            font-size: 0.875rem;
+            color: #F59E0B;
+        }
+        .upgrade {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #334155;
+            font-size: 0.75rem;
+        }
+        .upgrade a {
+            color: #3B82F6;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="code">429</div>
+        <div class="icon">🚦</div>
+        <h1>Too Many Requests</h1>
+        <p>You've exceeded the rate limit. Please slow down and try again later.</p>
+        <div class="retry-after" id="retry-after">
+            Retry after: <span id="seconds">60</span> seconds
+        </div>
+        <div class="upgrade">
+            Need higher limits? <a href="https://dashboard.rct-engine.com/billing">Upgrade your plan</a>
+        </div>
+    </div>
+    <script>
+        let seconds = 60;
+        const timer = setInterval(() => {
+            seconds--;
+            document.getElementById('seconds').textContent = seconds;
+            if (seconds <= 0) {
+                clearInterval(timer);
+                document.getElementById('retry-after').innerHTML = 'You can now retry your request.';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
