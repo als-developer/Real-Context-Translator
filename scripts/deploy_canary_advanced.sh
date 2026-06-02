@@ -73,4 +73,70 @@ monitor_metrics() {
         fi
         
         # Check latency
-        local p99_latency=$(curl -s "http://localhost:9090/api/v1
+        local p99_latency=$(curl -s "http://localhost:9090/api/v1/query?query=histogram_quantile(0.99,sum(rate(rct_api_request_duration_ms_bucket{version=\"canary\"}[1m]))by(le))" | jq -r '.data.result[0].value[1] // 0')
+        
+        if [ -n "$p99_latency" ] && [ "$p99_latency" != "null" ]; then
+            local p99_int=$(echo "$p99_latency" | cut -d. -f1)
+            if [ "$p99_int" -gt 500 ]; then
+                echo "⚠️ High latency detected: ${p99_latency}ms"
+            fi
+        fi
+        
+        sleep 10
+    done
+    
+    echo "✅ Canary metrics within threshold"
+    return 0
+}
+
+# Gradual rollout
+gradual_rollout() {
+    echo "🔄 Gradual rollout..."
+    
+    local steps=("25" "50" "75" "100")
+    
+    for step in "${steps[@]}"; do
+        echo "   Increasing to ${step}%..."
+        
+        if command -v kubectl &>/dev/null; then
+            kubectl patch virtualservice rct-api-canary -n rct-engine --type='json' \
+                -p="[{'op': 'replace', 'path': '/spec/http/1/route/0/weight', 'value': $((100 - step))}, {'op': 'replace', 'path': '/spec/http/1/route/1/weight', 'value': $step}]"
+        fi
+        
+        sleep 60
+        
+        # Quick validation after each step
+        local error_rate=$(curl -s "http://localhost:9090/api/v1/query?query=sum(rate(rct_api_errors_total[1m]))/sum(rate(rct_api_requests_total[1m]))*100" | jq -r '.data.result[0].value[1] // 0')
+        
+        if [ -n "$error_rate" ] && (( $(echo "$error_rate > $ROLLBACK_THRESHOLD" | bc -l) )); then
+            echo "❌ Error spike detected at ${step}% - rolling back"
+            return 1
+        fi
+    done
+    
+    echo "✅ Full rollout completed"
+    return 0
+}
+
+# Main
+main() {
+    deploy_canary
+    
+    if monitor_metrics; then
+        if gradual_rollout; then
+            echo ""
+            echo "✅ Canary deployment successful!"
+            exit 0
+        else
+            echo ""
+            echo "❌ Canary deployment failed - rolling back"
+            # Rollback logic here
+            exit 1
+        fi
+    else
+        echo "❌ Canary metrics failed - rolling back"
+        exit 1
+    fi
+}
+
+main
