@@ -1,0 +1,64 @@
+server:
+  http_listen_port: 3200
+  grpc_listen_port: 9096
+
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+ingester:
+  trace_idle_period: 10s
+  max_block_bytes: 1_073_741_824
+  max_block_duration: 5m
+  complete_block_timeout: 1h
+
+compactor:
+  compaction:
+    block_retention: 720h
+    compaction_window: 1h
+    max_block_bytes: 100_000_000
+    max_compaction_objects: 6000000
+
+storage:
+  trace:
+    backend: s3
+    s3:
+      bucket: tempo-traces
+      endpoint: s3.amazonaws.com
+      region: eu-west-1
+      access_key: ${AWS_ACCESS_KEY}
+      secret_key: ${AWS_SECRET_KEY}
+      insecure: false
+    wal:
+      path: /var/tempo/wal
+    local:
+      path: /var/tempo/blocks
+
+querier:
+  frontend_worker:
+    frontend_address: 0.0.0.0:9095
+
+query_frontend:
+  trace_by_id:
+    query_timeout: 30s
+  search:
+    query_timeout: 30s
+    sharder:
+      query_shards: 50
+      total_shards: 50
+
+metrics_generator:
+  registry:
+    external_labels:
+      source: tempo
+      cluster: rct-engine
+  storage:
+    path: /var/tempo/generator/wal
+    remote_write:
+      - url: http://prometheus:9090/api/v1/write
+        send_exemplars: true
