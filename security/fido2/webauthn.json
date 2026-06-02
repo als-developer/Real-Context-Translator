@@ -1,0 +1,40 @@
+{
+  "rp": {
+    "name": "RCT-Engine Security Gateway",
+    "id": "rct-engine.secure-bank.internal",
+    "icon": "https://rct-engine.com/icon.png"
+  },
+  "authenticatorSelection": {
+    "authenticatorAttachment": "cross-platform",
+    "requireResidentKey": true,
+    "userVerification": "required"
+  },
+  "attestation": "direct",
+  "pubKeyCredParams": [
+    {
+      "type": "public-key",
+      "alg": -7
+    },
+    {
+      "type": "public-key",
+      "alg": -257
+    },
+    {
+      "type": "public-key",
+      "alg": -8
+    }
+  ],
+  "excludeCredentials": [],
+  "authenticatorSelection": {
+    "authenticatorAttachment": "cross-platform",
+    "residentKey": "required",
+    "userVerification": "required"
+  },
+  "extensions": {
+    "credProps": true,
+    "largeBlob": {
+      "support": "required"
+    }
+  },
+  "timeout": 60000
+}
