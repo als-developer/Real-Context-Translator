@@ -110,7 +110,7 @@ jobs:
     
     steps:
       - name: Send security report to Slack
-        uses: slackapi/slack-github-action@v1.25
+        uses: slackapi/slack-github-action@v3.0
         with:
           payload: |
             {
