@@ -1,6 +1,6 @@
 # Multi-stage build for C++ AVX-512 Engine
 # Stage 1: Builder
-FROM gcc:13.2 AS builder
+FROM gcc:16.1 AS builder
 
 WORKDIR /build
 
