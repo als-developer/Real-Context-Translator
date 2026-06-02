@@ -1,0 +1,117 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: rct-postgres
+    environment:
+      POSTGRES_USER: rct_admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-vault_pass_2026}
+      POSTGRES_DB: rct_saas
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rct_admin -d rct_saas"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - rct-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: rct-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_pass}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - rct-network
+
+  # API Service
+  api:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.api
+    container_name: rct-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://rct_admin:${DB_PASSWORD:-vault_pass_2026}@postgres:5432/rct_saas
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_pass}@redis:6379/0
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - rct-network
+
+  # Worker Service
+  worker:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.worker
+    container_name: rct-worker
+    environment:
+      DATABASE_URL: postgresql://rct_admin:${DB_PASSWORD:-vault_pass_2026}@postgres:5432/rct_saas
+      REDIS_URL: redis://:${REDIS_PASSWORD:-redis_pass}@redis:6379/0
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - rct-network
+
+  # Billing Exporter (Go)
+  billing-exporter:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/Dockerfile.go
+    container_name: rct-billing-exporter
+    ports:
+      - "9102:9102"
+    environment:
+      REDIS_ADDR: redis:6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_pass}
+    depends_on:
+      - redis
+    networks:
+      - rct-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: rct-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/rate_limit.conf:/etc/nginx/conf.d/rate_limit.conf:ro
+    depends_on:
+      - api
+    networks:
+      - rct-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  rct-network:
+    driver: bridge
