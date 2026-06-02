@@ -1,0 +1,30 @@
+global:
+  slack_api_url: '${SLACK_WEBHOOK_URL}'
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname', 'cluster', 'service']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 12h
+  receiver: 'default-receiver'
+  
+  routes:
+    - match:
+        severity: critical
+        team: engineering
+      receiver: 'slack-engineering-critical'
+      continue: true
+    
+    - match:
+        severity: critical
+        team: compliance
+      receiver: 'slack-compliance-critical'
+      continue: true
+    
+    - match:
+        severity: warning
+      receiver: 'slack-warnings'
+    
+    - match:
+        alertname
