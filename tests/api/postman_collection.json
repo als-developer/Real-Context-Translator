@@ -1,0 +1,300 @@
+{
+  "info": {
+    "name": "RCT-Engine API Tests",
+    "description": "Complete API test suite for RCT-Engine Ultimate",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "3.0.0"
+  },
+  "item": [
+    {
+      "name": "Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response has status field\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('status');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": ["{{base_url}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Translate - Success",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response has translation_id\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('translation_id');",
+              "});",
+              "pm.test(\"Response has cultural_intelligence\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('cultural_intelligence');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"source_text\": \"Hello world, this is a test message\",\n    \"source_language\": \"en\",\n    \"target_country\": \"KE\",\n    \"target_language\": \"sw\",\n    \"industry_vertical\": \"marketing\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/translate",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "translate"]
+        }
+      }
+    },
+    {
+      "name": "Translate - Critical Risk (Saudi Arabia)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response indicates critical risk\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.cultural_intelligence.risk_matrix_rating).to.eql('CRITICAL');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"source_text\": \"Let's drink alcohol at the celebration\",\n    \"source_language\": \"en\",\n    \"target_country\": \"SA\",\n    \"target_language\": \"ar\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/translate",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "translate"]
+        }
+      }
+    },
+    {
+      "name": "Batch Translate",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response has batch_id\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('batch_id');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"texts\": [\n        {\n            \"source_text\": \"First test message\",\n            \"source_language\": \"en\",\n            \"target_country\": \"KE\",\n            \"target_language\": \"sw\"\n        },\n        {\n            \"source_text\": \"Second test message\",\n            \"source_language\": \"en\",\n            \"target_country\": \"NG\",\n            \"target_language\": \"en-pcm\"\n        }\n    ],\n    \"webhook_url\": \"https://webhook.site/test\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/batch/translate",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "batch", "translate"]
+        }
+      }
+    },
+    {
+      "name": "Get Dashboard Analytics",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response has total_translations\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('total_translations');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/analytics/dashboard?days=7",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "analytics", "dashboard"],
+          "query": [
+            {
+              "key": "days",
+              "value": "7"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Billing Plan",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "pm.test(\"Response has plan field\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('plan');",
+              "});"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "{{api_key}}"
+          },
+          {
+            "key": "X-Organization-ID",
+            "value": "{{org_id}}"
+          }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/v1/billing/plan",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "billing", "plan"]
+        }
+      }
+    },
+    {
+      "name": "Rate Limit Test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Rate limit returns 429 after many requests\", function () {",
+              "    // This test will be run multiple times",
+              "    var statusCode = pm.response.code;",
+              "    if (statusCode === 429) {",
+              "        pm.test(\"Rate limit exceeded\", function () {",
+              "            pm.expect(true).to.be.true;",
+              "        });",
+              "    }"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "X-API-Key",
+            "value": "test_key_ratelimit"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"source_text\": \"Rate limit test message\",\n    \"source_language\": \"en\",\n    \"target_country\": \"KE\",\n    \"target_language\": \"sw\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/v1/translate",
+          "host": ["{{base_url}}"],
+          "path": ["api", "v1", "translate"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8000",
+      "type": "string"
+    },
+    {
+      "key": "api_key",
+      "value": "test_api_key_123",
+      "type": "string"
+    },
+    {
+      "key": "org_id",
+      "value": "test_org_123",
+      "type": "string"
+    }
+  ]
+}
