@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: RCT-Engine Backup S3 Bucket with Encryption and Lifecycle Rules
+
+Parameters:
+  Environment:
+    Type: String
+    Default: production
+    AllowedValues:
+      - development
+      - staging
+      - production
+  BackupRetentionDays:
+    Type: Number
+    Default: 90
+    Description: Number of days to retain backups
+
+Resources:
+  BackupBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "rct-engine-backups-${Environment}-${AWS::AccountId}"
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldBackups
+            Status: Enabled
+            ExpirationInDays: !Ref BackupRetentionDays
+            Prefix: backups/
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  BackupBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref BackupBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Deny
+            Principal: '*'
+            Action: 's3:*'
+            Resource:
+              - !Sub "${BackupBucket.Arn}/*"
+              - !Sub "${BackupBucket.Arn}"
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+
+  BackupLifecycleRule:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BackupBucket
+      LifecycleConfiguration:
+        Rules:
+          - Id: TransitionToGlacier
+            Status: Enabled
+            Prefix: backups/
+            Transitions:
+              - StorageClass: GLACIER
+                TransitionInDays: 30
+
+Outputs:
+  BackupBucketName:
+    Description: Name of the backup S3 bucket
+    Value: !Ref BackupBucket
+  BackupBucketArn:
+    Description: ARN of the backup S3 bucket
+    Value: !GetAtt BackupBucket.Arn
