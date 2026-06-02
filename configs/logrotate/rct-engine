@@ -1,0 +1,44 @@
+/var/log/rct_engine/*.log {
+    daily
+    rotate 30
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    dateext
+    dateformat -%Y%m%d-%s
+    
+    postrotate
+        # Reload services to reopen log files
+        docker exec rct-api kill -HUP 1 2>/dev/null || true
+        docker exec rct-worker kill -HUP 1 2>/dev/null || true
+        systemctl reload nginx 2>/dev/null || true
+    endscript
+}
+
+/var/log/nginx/*.log {
+    daily
+    rotate 30
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        [ -f /var/run/nginx.pid ] && kill -USR1 `cat /var/run/nginx.pid`
+    endscript
+}
+
+/var/log/rct_postgres/*.log {
+    weekly
+    rotate 4
+    missingok
+    notifempty
+    compress
+    delaycompress
+    sharedscripts
+    postrotate
+        docker exec rct-postgres kill -HUP 1 2>/dev/null || true
+    endscript
+}
