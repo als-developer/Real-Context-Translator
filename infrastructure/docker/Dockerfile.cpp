@@ -14,7 +14,7 @@ RUN g++ -O3 -std=c++23 -march=native -mavx512f -mavx512dq \
     -o rct_core rct_core.cpp
 
 # Stage 2: Minimal runtime
-FROM alpine:3.19
+FROM alpine:3.24
 
 RUN apk add --no-cache libstdc++
 
