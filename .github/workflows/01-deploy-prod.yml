@@ -195,7 +195,7 @@ jobs:
 
     steps:
       - name: Send Slack notification
-        uses: slackapi/slack-github-action@v1.25
+        uses: slackapi/slack-github-action@v3.0
         with:
           payload: |
             {
