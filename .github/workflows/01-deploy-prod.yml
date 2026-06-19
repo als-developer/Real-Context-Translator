@@ -174,7 +174,7 @@ jobs:
           sed -i "s|REPLACE_IMAGE_TAG|${{ github.sha }}|g" infrastructure/ecs/task-definition.json
 
       - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v2
         with:
           task-definition: infrastructure/ecs/task-definition.json
           service: ${{ env.ECS_SERVICE }}
