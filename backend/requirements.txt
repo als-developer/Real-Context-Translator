@@ -12,7 +12,7 @@ anthropic==0.23.1
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.9
-prometheus-client==0.19.0
+prometheus-client==0.25.0
 loguru==0.7.2
 slack-sdk==3.27.0
 psycopg2-binary==2.9.9
